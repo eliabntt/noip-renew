@@ -47,6 +47,11 @@ function install() {
     # Debian9 package 'python-selenium' does not work with chromedriver,
     # Install from pip, which is newer
     $SUDO $PYTHON -m pip install selenium
+    read -p 'Set up Notifications? (y/n): ' notify
+    if [ "${notify^^}" = "Y" ]
+    then
+      notificationInstall
+    fi
 }
 
 function install_arch(){
@@ -100,6 +105,10 @@ function deploy() {
     noip
     $SUDO crontab -u $USER -l | grep -v '/noip-renew*'  | $SUDO crontab -u $USER -
     ($SUDO crontab -u $USER -l; echo "$CRONJOB") | $SUDO crontab -u $USER -
+    if [ "${notify^^}" = "Y" ]
+    then
+      notificationSetup(notification)
+    fi
     $SUDO sed -i 's/USER=/USER='$USER'/1' $INSTDIR/noip-renew-skd.sh
     echo "Installation Complete."
     echo "To change noip.com account details, please run setup.sh again."
@@ -133,6 +142,64 @@ function uninstall() {
       $SUDO rm -rf $LOGDIR
     fi
 }
+
+function notificationInstall() {
+    PS3='Select an option: '
+    options=("Pushover Notifications" "Slack Notifications" "Telegram Notifications" "None")
+    select opt in "${options[@]}"
+    do
+        case $opt in
+            "Pushover Notifications")
+                notification = "Pushover"
+                echo "Pushover requirements installed."
+                break
+                ;;
+            "Slack Notifications")
+                notification = "Slack"
+                $SUDO $PYTHON -m pip install slackclient
+                echo "Slack requirements installed."
+                break
+                ;;
+            "Telegram Notifications")
+                notification = "Telegram"
+                $SUDO $PYTHON -m pip install telegram-send
+                $SUDO telegram-send --configure
+                echo "Telegram requirements installed."
+                break
+                ;;
+            "None")
+                notify = "N"
+                break
+                ;;
+            *) echo "invalid option $REPLY";;
+        esac
+    done
+}
+
+function notificationSetup(notification) {
+    echo $notification
+}
+
+
+function slack() {
+    echo "Enter your Slack Bot User OAuth Access Token..."
+    read -p 'Token: ' tokenvar
+
+    tokenvar=`echo -n $tokenvar | base64`
+
+    $SUDO sed -i 's/SLACKTOKEN=".*"/SLACKTOKEN="'$tokenvar'"/1' $INSTEXE
+}
+
+function pushover() {
+    pushover = true
+    echo "Picked Pushover"
+}
+
+function telegram() {
+    telegram = true
+    echo "Picked Telegram"
+}
+
 
 PS3='Select an option: '
 options=("Install/Repair Script" "Update noip.com account details" "Uninstall Script" "Exit setup.sh")
