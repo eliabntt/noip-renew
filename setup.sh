@@ -33,6 +33,7 @@ function config() {
     CRONJOB="0 1    * * *   $USER    $INSTEXE $LOGDIR"
 }
 
+
 function install() {
     OS=$(hostnamectl | grep -i "operating system")
     echo "$OS"
@@ -115,6 +116,7 @@ function deploy() {
     echo "Logs can be found in '$LOGDIR'"
 }
 
+
 function noip() {
     echo "Enter your No-IP Account details..."
     read -p 'Username: ' uservar
@@ -127,11 +129,13 @@ function noip() {
     $SUDO sed -i 's/PASSWORD=".*"/PASSWORD="'$passvar'"/1' $INSTEXE
 }
 
+
 function installer() {
     config
     install
     deploy
 }
+
 
 function uninstall() {
     $SUDO sed -i '/noip-renew/d' /etc/crontab
@@ -142,6 +146,7 @@ function uninstall() {
       $SUDO rm -rf $LOGDIR
     fi
 }
+
 
 function notificationInstall() {
     PS3='Select an option: '
@@ -180,21 +185,12 @@ function notificationSetup() {
     $SUDO sed -i 's/NOTIFICATION=".*"/NOTIFICATION="'$1'"/1' $INSTEXE
 
     case $1 in
-        "Pushover") echo "PUSHOVER";;
-        "Slack") echo "SLACK";;
-        "Telegram" echo "TELEGRAM";;
+        "Pushover") pushover;;
+        "Slack") slack;;
+        "Telegram") telegram;;
     esac
 }
 
-
-function slack() {
-    echo "Enter your Slack Bot User OAuth Access Token..."
-    read -p 'Token: ' tokenvar
-
-    tokenvar=`echo -n $tokenvar | base64`
-
-    $SUDO sed -i 's/SLACKTOKEN=".*"/SLACKTOKEN="'$tokenvar'"/1' $INSTEXE
-}
 
 function pushover() {
     echo "Enter your Pushover Token..."
@@ -211,6 +207,17 @@ function pushover() {
 
     $SUDO sed -i 's/PUSHOVER_USER_KEY=".*"/PUSHOVER_USER_KEY="'$uservar'"/1' $INSTEXE
 }
+
+
+function slack() {
+    echo "Enter your Slack Bot User OAuth Access Token..."
+    read -p 'Token: ' tokenvar
+
+    tokenvar=`echo -n $tokenvar | base64`
+
+    $SUDO sed -i 's/SLACKTOKEN=".*"/SLACKTOKEN="'$tokenvar'"/1' $INSTEXE
+}
+
 
 function telegram() {
     echo "Please configure Telegram:"
