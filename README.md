@@ -20,6 +20,8 @@ using Python/Selenium with Chrome headless mode.
 2. Run setup.sh and set your noip.com account information,
 3. Run noip-renew-USERNAME command.
 
+For information on how to set up Notifications, please read the Notifications section.
+
 As a suggestion, run `setup.sh root` to save everything as root. In the current version of the code the password is store "encrypted" in a file which would be readable by anyone that has access to the pc if you do not do so. Alternatively, create a specific user for this purpose.
 
 Check confirmed records from multiple log files:
@@ -28,6 +30,7 @@ Check confirmed records from multiple log files:
 grep -h Confirmed *.log | grep -v ": 0" | sort
 ```
 
+<<<<<<< HEAD
 ## Usage with Docker (not yet tested)
 
 For docker users, run the following:
@@ -40,7 +43,7 @@ docker build -t loblab/selenium:debian .
 echo -e "$(crontab -l)"$'\n'"12  3  *  *  1,3,5  docker run --network host loblab/selenium:debian ${my_username} ${my_password} ${my_host_num} ${debug_lvl}" | crontab -
 ```
 
-To check script version, use command: ``noip-renew-user --version``
+To check script version, use command: ``noip-renew-username --version``
 
 ## Remarks
 
@@ -52,12 +55,23 @@ You can also check [DNS-O-Matic](https://dnsomatic.com/) to update multiple noip
 
 ## Notification Setup
 
-Pushover:
-Slack:
-Telegram:
+# Pushover:
+
+1. Create an account over at https://pushover.net/signup.
+2. After signing up and confirming your account, you should see a User Key. This is required during setup.
+3. Create a [new application/API Token](https://pushover.net/apps/build). I've named mine "No-IP Host Monitor"
+4. Once you've created your new App, you will see an API Token/Key. This is also required during setup.
+5. Make sure you have the Pushover Application installed on your [device of choice](https://pushover.net/clients).
+6. When running setup.sh, insert your pushover details when asked. This should now work.
+
+# Slack:
+
+
+# Telegram:
 
 
 ## History
+- 1.3 (29/12/2021): eliabntt edits for noip and selenium changes
 - 1.2 (06/11/2020): Added Notification support for Pushover, Slack & Telegram. 
 - 1.1 (06/05/2020): Fixed error when attempting to update an expired host.
 - 1.0 (05/18/2020): Minor fixes to an xpath & a try catch pass to avoid an exception. Also fixed versioning.
