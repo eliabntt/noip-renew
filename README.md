@@ -15,6 +15,7 @@ using Python/Selenium with Chrome headless mode.
 
 ![noip.com hosts](https://raw.githubusercontent.com/loblab/noip-renew/master/screenshot.png)
 
+
 ## Usage
 
 1. Clone this repository to the device you will be running it from. (`git clone https://github.com/eliabntt/noip-renew.git`)
@@ -44,6 +45,7 @@ echo -e "$(crontab -l)"$'\n'"12  3  *  *  1,3,5  docker run --network host lobla
 ```
 
 To check script version, use command: ``noip-renew-username --version``
+
 
 ## Remarks
 
@@ -109,6 +111,7 @@ You can also check [DNS-O-Matic](https://dnsomatic.com/) to update multiple noip
 7. Run setup.sh and select Telegram. When prompted to enter an access token, enter the token you received earlier.
 8. You should now be given a 5 digit code which you must send via Telegram to your bot. Setup of Telegram is now complete.
 ![2020-06-19_13-42-25](https://user-images.githubusercontent.com/23632287/85134940-257a3c00-b235-11ea-804b-1e50f4724736.png)
+
 
 ## History
 - 1.3 (29/12/2021): eliabntt edits for noip and selenium changes
