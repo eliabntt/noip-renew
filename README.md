@@ -8,6 +8,7 @@ using Python/Selenium with Chrome headless mode.
 - Ver: 1.3
 - Ref: [Technical explanation for the code (Chinese)](http://www.jianshu.com/p/3c8196175147)
 - Updated: 29 December 2021
+- Created: 11/04/2017
 - Author: loblab
 - Fork Mantainer: eliabntt
 - Contributor: [IDemixI](https://www.github.com/IDemixI)
@@ -83,9 +84,20 @@ You can also check [DNS-O-Matic](https://dnsomatic.com/) to update multiple noip
 ![2020-06-18_22-44-39](https://user-images.githubusercontent.com/23632287/85078811-2ff8ef00-b1bd-11ea-9543-cf616bfc56b2.png)
 8. Install the script, entering your Access Token and Channel when prompted.
 
-
 ### Telegram:
 
+1. Create a Telegram account by downloading the App to your device https://telegram.org/. 
+   - Please note, for Telegram you need to use your mobile number.
+2. After you have an account set up, I recommend setting the bot up using a [browser](https://web.telegram.org/) on a device you can copy and paste from.
+3. Navigate to https://telegram.me/BotFather and set up a new bot. I did this using `/start` followed by `/newbot`
+![2020-06-19_13-41-26](https://user-images.githubusercontent.com/23632287/85134354-3fffe580-b234-11ea-98f9-e64306c9c264.png)
+4. Follow the steps through, naming your bot. Finding a free username was tricky.
+5. You will now be given an access token. This will be needed for setup so make a note of this. 
+![2020-06-19_13-41-03](https://user-images.githubusercontent.com/23632287/85134895-1abfa700-b235-11ea-8fab-66ef43a1bb86.png)
+6. Click the link to your bot in order to open a chat window with it. Keep this window open for now.
+7. Run setup.sh and select Telegram. When prompted to enter an access token, enter the token you received earlier.
+8. You should now be given a 5 digit code which you must send via Telegram to your bot. Setup of Telegram is now complete.
+![2020-06-19_13-42-25](https://user-images.githubusercontent.com/23632287/85134940-257a3c00-b235-11ea-804b-1e50f4724736.png)
 
 ## History
 - 1.3 (29/12/2021): eliabntt edits for noip and selenium changes
