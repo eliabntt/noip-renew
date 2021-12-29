@@ -2,9 +2,9 @@
 set -e
 
 PYTHON=python3
+
 USER=$(whoami)
 if [ "$USER" == "root" ]; then
-    USER=$1
     if [ -z "$USER" ]; then
         echo "Chrome is safer to run as normal user instead of 'root', so"
         echo "run the script as a normal user (with sudo permission), "
@@ -15,6 +15,16 @@ if [ "$USER" == "root" ]; then
 else
     SUDO=sudo
 fi
+
+USER=$1
+if [ "$USER" == "" ]; then
+    USER=$(whoami)
+fi
+
+SUDO=sudo
+HOME=/home/$USER
+echo "Installing program as $USER"
+sleep 3
 
 function config() {
     LOGDIR=/var/log/noip-renew/$USER

@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 from datetime import date
 from datetime import timedelta
@@ -39,7 +40,7 @@ class Robot:
 
     USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:64.0) Gecko/20100101 Firefox/64.0"
     LOGIN_URL = "https://www.noip.com/login"
-    HOST_URL = "https://my.noip.com/#!/dynamic-dns"
+    HOST_URL = "https://my.noip.com/dynamic-dns"
 
     def __init__(self, username, password, debug):
         self.debug = debug
@@ -55,6 +56,7 @@ class Robot:
         options.add_argument("disable-features=VizDisplayCompositor")
         options.add_argument("headless")
         options.add_argument("no-sandbox")  # need when run in docker
+        options.add_argument("disable-gpu")
         options.add_argument("window-size=1200x800")
         options.add_argument(f"user-agent={Robot.USER_AGENT}")
         if 'https_proxy' in os.environ:
@@ -70,13 +72,13 @@ class Robot:
             self.browser.save_screenshot("debug1.png")
 
         self.logger.log("Logging in...")
-        ele_usr = self.browser.find_element_by_name("username")
-        ele_pwd = self.browser.find_element_by_name("password")
+        ele_usr = self.browser.find_element(By.XPATH,"//form[@id='clogs']/input[@name='username']")
+        ele_pwd = self.browser.find_element(By.XPATH,"//form[@id='clogs']/input[@name='password']")
         ele_usr.send_keys(self.username)
         ele_pwd.send_keys(base64.b64decode(self.password).decode('utf-8'))
-        self.browser.find_element_by_name("Login").click()
+        self.browser.find_element(By.XPATH,"//form[@id='clogs']/button[@type='submit']").click()
         if self.debug > 1:
-            time.sleep(1)
+            self.browser.implicitly_wait(1)
             self.browser.save_screenshot("debug2.png")
 
     def update_hosts(self):
@@ -95,7 +97,7 @@ class Robot:
             expiration_days = self.get_host_expiration_days(host, iteration)
             next_renewal.append(expiration_days)
             self.logger.log(f"{host_name} expires in {str(expiration_days)} days")
-            if expiration_days < 7:
+            if expiration_days <= 7:
                 self.update_host(host_button, host_name)
                 count += 1
             iteration += 1
@@ -105,7 +107,10 @@ class Robot:
         today = date.today() + timedelta(days=nr)
         day = str(today.day)
         month = str(today.month)
-        subprocess.call(['/usr/local/bin/noip-renew-skd.sh', day, month, "True"])
+        try:
+            subprocess.call(['/usr/local/bin/noip-renew-skd.sh', day, month, "True"])
+        except (FileNotFoundError,PermissionError):
+            self.logger.log(f"noip-renew-skd.sh missing or not executable, skipping crontab configuration")
         return True
 
     def open_hosts_page(self):
@@ -119,10 +124,10 @@ class Robot:
     def update_host(self, host_button, host_name):
         self.logger.log(f"Updating {host_name}")
         host_button.click()
-        time.sleep(3)
+        self.browser.implicitly_wait(3)
         intervention = False
         try:
-            if self.browser.find_elements_by_xpath("//h2[@class='big']")[0].text == "Upgrade Now":
+            if self.browser.find_elements(By.XPATH, "//h2[@class='big']")[0].text == "Upgrade Now":
                 intervention = True
         except:
             pass
@@ -135,26 +140,23 @@ class Robot:
     @staticmethod
     def get_host_expiration_days(host, iteration):
         try:
-            host_remaining_days = host.find_element_by_xpath(".//a[@class='no-link-style']").text
+            host_remaining_days = host.find_element(By.XPATH, ".//a[contains(@class,'no-link-style')]").get_attribute("data-original-title")
         except:
-            host_remaining_days = "Expires in 0 days"
+            host_remaining_days = "0"
             pass
-        regex_match = re.search("\\d+", host_remaining_days)
-        if regex_match is None:
-            raise Exception("Expiration days label does not match the expected pattern in iteration: {iteration}")
-        expiration_days = int(regex_match.group(0))
+        expiration_days = [int(s) for s in host_remaining_days.split() if s.isdigit()][0]
         return expiration_days
 
     @staticmethod
     def get_host_link(host, iteration):
-        return host.find_element_by_xpath(".//a[@class='link-info cursor-pointer']")
+        return host.find_element(By.XPATH, ".//a[@class='link-info cursor-pointer']")
 
     @staticmethod
     def get_host_button(host, iteration):
-        return host.find_element_by_xpath(".//following-sibling::td[4]/button[contains(@class, 'btn')]")
+        return host.find_element(By.XPATH,".//following-sibling::td[4]/button[contains(@class, 'btn')]")
 
     def get_hosts(self):
-        host_tds = self.browser.find_elements_by_xpath("//td[@data-title=\"Host\"]")
+        host_tds = self.browser.find_elements(By.XPATH, "//td[@data-title=\"Host\"]")
         if len(host_tds) == 0:
             raise Exception("No hosts or host table rows not found")
         return host_tds
@@ -169,7 +171,10 @@ class Robot:
         except Exception as e:
             self.logger.log(str(e))
             self.browser.save_screenshot("exception.png")
-            subprocess.call(['/usr/local/bin/noip-renew-skd.sh', "*", "*", "False"])
+            try:
+                subprocess.call(['/usr/local/bin/noip-renew-skd.sh', "*", "*", "False"])
+            except (FileNotFoundError,PermissionError):
+                self.logger.log(f"noip-renew-skd.sh missing or not executable, skipping crontab configuration")
             rc = 2
         finally:
             self.browser.quit()
