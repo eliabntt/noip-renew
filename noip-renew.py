@@ -200,6 +200,7 @@ class Robot:
             if expiration_days <= 7:
                 self.update_host(host_button, host_name)
                 count += 1
+                next_renewal[-1] = self.get_host_expiration_days(host, iteration)
             iteration += 1
         self.browser.save_screenshot("results.png") # Image of host page listing all active hosts.
         self.logger.log(f"Confirmed hosts: {count}", 2)
@@ -248,8 +249,17 @@ class Robot:
         except:
             host_remaining_days = "0"
             pass
-        expiration_days = [int(s) for s in host_remaining_days.split() if s.isdigit()][0]
-        return expiration_days
+        if host_remaining_days is not None:
+            expiration_days = [int(s) for s in host_remaining_days.split() if s.isdigit()][0]
+            return expiration_days
+        else:
+            try:
+                host_remaining_days = host.find_element(By.XPATH, ".//a[contains(@class,'no-link-style')]").text
+            except:
+                host_remaining_days = "0"
+                pass
+            expiration_days = [int(s) for s in host_remaining_days.split() if s.isdigit()][0]
+            return expiration_days
 
     @staticmethod
     def get_host_link(host, iteration):
