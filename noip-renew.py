@@ -153,16 +153,20 @@ class Robot:
     def init_browser():
         options = webdriver.ChromeOptions()
         #added for Raspbian Buster 4.0+ versions. Check https://www.raspberrypi.org/forums/viewtopic.php?t=258019 for reference.
-        options.add_argument("disable-features=VizDisplayCompositor")
-        options.add_argument("headless")
-        options.add_argument("no-sandbox")  # need when run in docker
-        options.add_argument("disable-gpu")
-        options.add_argument("window-size=1200x800")
-        options.add_argument(f"user-agent={Robot.USER_AGENT}")
-        if 'https_proxy' in os.environ:
-            options.add_argument("proxy-server=" + os.environ['https_proxy'])
-        browser = webdriver.Chrome(options=options)
-        browser.set_page_load_timeout(90) # Extended timeout for Raspberry Pi.
+        # options.add_argument("disable-features=VizDisplayCompositor")
+        options.add_argument("--headless")
+        #options.add_argument("disable-dev-shm-usage")
+        options.add_argument("--no-sandbox")  # need when run in docker
+        options.add_argument("--disable-gpu")
+        options.add_argument("--window-size=1200x800")
+        options.add_argument(f"--user-agent={Robot.USER_AGENT}")
+        #if 'https_proxy' in os.environ:
+        #    options.add_argument("proxy-server=" + os.environ['https_proxy'])
+        options.add_argument('--no-proxy-server')
+        options.add_argument("--proxy-server='direct://'")
+        options.add_argument("--proxy-bypass-list=*")
+        browser = webdriver.Chrome(executable_path="/usr/bin/chromedriver", options=options)
+        browser.set_page_load_timeout(180) # Extended timeout for Raspberry Pi.
         return browser
 
     def login(self):
@@ -176,9 +180,10 @@ class Robot:
         ele_pwd = self.browser.find_element(By.XPATH,"//form[@id='clogs']/input[@name='password']")
         ele_usr.send_keys(self.username)
         ele_pwd.send_keys(base64.b64decode(self.password).decode('utf-8'))
-        self.browser.find_element(By.XPATH,"//form[@id='clogs']/button[@type='submit']").click()
+        self.browser.save_screenshot("loginfilled.png")
+        self.browser.find_element(By.ID, "clogs-captcha-button").click()
         if self.debug > 1:
-            self.browser.implicitly_wait(1)
+            self.browser.implicitly_wait(10)
             self.browser.save_screenshot("debug2.png")
 
     def update_hosts(self):
