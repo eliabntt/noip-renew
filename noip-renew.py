@@ -24,6 +24,7 @@ import os
 import re
 import base64
 import subprocess
+import ipdb
 
 try:
     from discord_webhook import DiscordWebhook, DiscordEmbed
@@ -176,25 +177,35 @@ class Robot:
             self.browser.save_screenshot("debug1.png")
 
         self.logger.log("Logging in...")
-        ele_usr = self.browser.find_element(By.XPATH,"//form[@id='clogs']/input[@name='username']")
-        ele_pwd = self.browser.find_element(By.XPATH,"//form[@id='clogs']/input[@name='password']")
+        #ipdb.set_trace()
+        ele_usr = self.browser.find_element(By.XPATH,"//form[@id='clogs']").find_element(By.ID, 'username')
+        ele_pwd = self.browser.find_element(By.XPATH,"//form[@id='clogs']").find_element(By.ID, 'password')
         ele_usr.send_keys(self.username)
         ele_pwd.send_keys(base64.b64decode(self.password).decode('utf-8'))
         self.browser.save_screenshot("loginfilled.png")
         self.browser.find_element(By.ID, "clogs-captcha-button").click()
+        #self.browser.find_element(By.XPATH,"//form[@id='clogs']/button[@type='submit']").click()
         if self.debug > 1:
             self.browser.implicitly_wait(10)
-            self.browser.save_screenshot("debug2.png")
+            self.logger.log("debug-login")
+            self.browser.save_screenshot("debug-login.png")
 
     def update_hosts(self):
         count = 0
-
+        time.sleep(5)
         self.open_hosts_page()
-        time.sleep(1)
+        time.sleep(5)
         iteration = 1
         next_renewal = []
 
-        hosts = self.get_hosts()
+        self.browser.save_screenshot("hosts.png") # Image of host page listing all active hosts.
+        #ipdb.set_trace()
+        try:
+            hosts = self.get_hosts()
+        except:
+            # todo use host-data-widget or dropdown? 
+            self.open_hosts_page()
+            hosts = self.get_hosts()
         for host in hosts:
             host_link = self.get_host_link(host, iteration) # This is for if we wanted to modify our Host IP.
             host_button = self.get_host_button(host, iteration) # This is the button to confirm our free host
